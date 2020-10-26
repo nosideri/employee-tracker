@@ -21,7 +21,7 @@ async function start() {
     inquirer.prompt({
         type: "list",
         message: "What would you like to do?",
-        choices: ["View all departments", "View all roles", "View all employees", "View employee names", "Add a department", "Add a role", "Add an employee", "Update an employee role"],
+        choices: ["View all departments", "View all roles", "View all employees", "View employee names", "View employee by manager", "Add a department", "Add a role", "Add an employee", "Update an employee role"],
         name: "selection"
     }).then(function(userinput){
         console.log(userinput.selection)
@@ -40,6 +40,10 @@ async function start() {
         } else if (userinput.selection == "View employee names") {
             //show employee names
             viewEmployeeNames();
+
+        } else if (userinput.selection == "View employee by manager") {
+            //show employees by manager
+            viewEmpByMgr()
             
         } else if (userinput.selection == "Add a department") {
             //add another department
@@ -61,6 +65,7 @@ async function start() {
     })
 };
 
+// View all departments
 async function viewDepartment() {
     let query = "SELECT * FROM department";
     connection.query(query, function(err, res) {
@@ -70,8 +75,9 @@ async function viewDepartment() {
     })
 }
 
+// View all roles
 async function viewRoles() {
-    let query = "SELECT title, role.id, department_id, salary, department.name FROM role, department";
+    let query = "SELECT title, id AS role_id, department_id, salary FROM role";
     connection.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -79,8 +85,11 @@ async function viewRoles() {
     })
 }
 
+// View all employess + their info
 async function viewEmployees() {
-    let query = "SELECT employee.id, first_name, last_name, role.title, department.name, role.salary, manager_id FROM employee, role, department";
+    // SELECT id, first_name, last_name, role.title, role.salary, department.name AS department, manager_id AS Manager FROM employee e LEFT JOIN employee m ON employee.manager_id = manager.id INNER JOIN role r ON employee.role_id = role.id INNER JOIN department d ON role.department_id = department.id
+    // code above gave errors, saving until I can debug it.
+    let query = "SELECT * FROM employee";
     connection.query(query, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -88,6 +97,7 @@ async function viewEmployees() {
     })
 }
 
+// View just employee names
 async function viewEmployeeNames() {
     let query = "SELECT first_name, last_name FROM employee";
 
@@ -98,6 +108,24 @@ async function viewEmployeeNames() {
     })
 }
 
+// View employees by manager
+async function viewEmpByMgr() {
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "Enter the manager's ID that you would like to view.",
+            name: "mgrView"
+        }
+    ]).then(function(response) {
+        connection.query("SELECT first_name, last_name FROM employee WHERE manager_id=?", [response.mgrView], function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            start();
+        })
+    })
+}
+
+// Add a department
 async function addDepartment() {
     inquirer.prompt({
         type: "input",
@@ -112,6 +140,7 @@ async function addDepartment() {
     })
 }
 
+// Add another role
 async function addRole() {
     inquirer.prompt([
         {
@@ -138,6 +167,7 @@ async function addRole() {
     })
 }
 
+// Add another employee
 async function addEmployee() {
     inquirer.prompt([
         {
@@ -169,25 +199,27 @@ async function addEmployee() {
     })
 }
 
+// Update a current employee
 async function updateEmployee() {
-    let employees = viewEmployeeNames();
-    let roles = viewRoles();
+    //let employees = viewEmployeeNames();
+    //let roles = viewRoles();
 
     inquirer.prompt([
         {
-            type: "list",
+            type: "input",
             message: "Which employee would you like to update?",
             name: "empUpdate",
-            choices: [ employees ]
         },
         {
-            type: "list",
+            type: "input",
             message: "What is the employees new role?",
             name: "updateRole",
-            choices: [ roles ]
         }
     ]).then(function(response) {
+        connection.query("UPDATE employee SET role_id=? WHERE first_name=?", [response.updateRole, response.empUpdate], function(err, res) {
+            if (err) throw err;
             console.table(res);
             start();
         })
+    })
 }
