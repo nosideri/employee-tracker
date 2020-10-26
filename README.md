@@ -8,7 +8,6 @@ Check out the badges hosted by [shields.io](https://shields.io/).
   *  [Description](#description) 
   *  [Installation](#installation)
   *  [Usage](#usage)
-  *  [Tests](#tests) 
   *  [Questions](#questions)
   *  [License](#license)
   *  [Contribution](#contribution)
@@ -17,13 +16,13 @@ Check out the badges hosted by [shields.io](https://shields.io/).
 
 A content management system (CMS) that helps to manage a companys employee database. Allows business owners to view and manage the departments, roles, and employees in their company so that they can organize and plan their business.
 
-    ### Built with
+### Built with
 
-    * Javascript
-    * Node.js
-    * Inquirer
-    * MySQL
-    * Console.table
+* Javascript
+* Node.js
+* Inquirer
+* MySQL
+* Console.table
 
 ## Installation 
 
